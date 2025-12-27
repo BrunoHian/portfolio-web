@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cadastro de Editora</title>
+
+  <link rel="stylesheet" href="/home-page/login/cadastro/editora/editora.css" />
+
+  <style>
+    /* Fundo preto escuro */
+    body {
+      position: relative;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: white;
+      min-height: 100vh;
+      background-color: #000;
+      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+ 
+
+    /* Formulário centralizado e destacado */
+    form#cadastroEditoraForm {
+      position: relative;
+      z-index: 1;
+      max-width: 400px;
+      width: 100%;
+      background: rgba(20, 20, 20, 0.85);
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(255, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      box-sizing: border-box;
+    }
+
+    /* Barra laranja */
+    .barra-horizontal {
+      background-color: #f4c542;
+      height: 5px;
+      width: 200px;
+      border-radius: 3px;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 1.8rem;
+      margin-bottom: 0;
+      text-align: center;
+      color: #f4c542;
+      letter-spacing: 1px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      color: #ddd;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"] {
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: none;
+      background-color: #222;
+      color: white;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus {
+      outline: none;
+      background-color: #3a0e0e;
+      box-shadow: 0 0 6px #f87842;
+    }
+
+    button {
+      padding: 14px;
+      border-radius: 30px;
+      border: none;
+      background: linear-gradient(90deg, #f4c542, #d94f3e);
+      color: rgb(9, 1, 1);
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background 0.3s ease;
+      box-shadow: 0 5px 15px rgba(255, 135, 66, 0.7);
+    }
+
+    button:hover {
+      background: linear-gradient(90deg, #d94f3e, #f87842);
+      box-shadow: 0 8px 25px rgba(217, 79, 62, 0.9);
+    }
+
+    #logo {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 120px;
+      z-index: 2;
+      filter: drop-shadow(0 0 8px #f87842);
+    }
+
+    @media (max-width: 460px) {
+      form#cadastroEditoraForm {
+        padding: 25px 20px;
+      }
+      #planeta {
+        width: 150px;
+        height: 150px;
+        bottom: 20px;
+      }
+      #logo {
+        width: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Planeta de fundo -->
+  <div id="planeta"></div>
+
+  <a href="/home-page/hmpg.html">
+    <img src="../../../imagens/logo_biblioteca.png" alt="Logo Biblioteca" id="logo" />
+  </a>
+
+  <form id="cadastroEditoraForm">
+    <div class="titulo">
+      <h1>Crie sua editora</h1>
+      <div class="barra-horizontal"></div>
+    </div>
+
+    <div class="campo-input">
+      <label for="nome">Nome*</label>
+      <input type="text" id="nome" name="nome" required />
+    </div>
+
+    <div class="campo-input">
+      <label for="email">E-mail*</label>
+      <input type="email" id="email" name="email" required />
+    </div>
+
+    <div class="campo-input">
+      <label for="telefone">Seu telefone*</label>
+      <input type="tel" id="telefone" name="telefone" placeholder="(XX) XXXXX-XXXX" maxlength="15" required />
+    </div>
+
+    <button type="submit">CRIAR</button>
+  </form>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById("cadastroEditoraForm");
+
+      form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const jsonData = Object.fromEntries(formData.entries());
+
+        // Adiciona o tipoUsuario fixo para controle no backend
+        jsonData.tipoUsuario = "funcionario";
+
+        try {
+          const response = await fetch("/cadastrar-editora", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(jsonData),
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.success) {
+            alert(`Editora cadastrada com sucesso! ID: ${result.id || ''}`);
+            form.reset();
+          } else {
+            alert(result.message || "Erro ao cadastrar editora.");
+            console.error("Erro do servidor:", result);
+          }
+        } catch (error) {
+          alert("Erro ao conectar com o servidor.");
+          console.error(error);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

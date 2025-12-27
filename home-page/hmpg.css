@@ -1,0 +1,137 @@
+/* footer-livros.css */
+
+/* Footer geral */
+footer {
+  background: rgba(0,0,0,0.8);
+  padding: 30px 20px;
+  color: white;
+  box-sizing: border-box;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+}
+
+/* Título do footer */
+footer h1 {
+  font-weight: 600;
+  font-size: 2rem;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+/* Lista de livros */
+footer ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+  margin: 0 0 20px 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #f4c542 transparent;
+}
+footer ul::-webkit-scrollbar {
+  height: 8px;
+}
+footer ul::-webkit-scrollbar-track {
+  background: transparent;
+}
+footer ul::-webkit-scrollbar-thumb {
+  background-color: #f4c542;
+  border-radius: 4px;
+}
+
+/* Itens da lista */
+footer ul li {
+  flex: 0 0 auto;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 260px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+footer ul li:hover {
+  transform: scale(1.05);
+}
+
+/* Box do livro (imagem + info) */
+.company-box {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+}
+
+/* Imagem do livro */
+.company-box img {
+  width: 60px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+/* Informações do livro */
+.company-info h3 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: white;
+}
+.company-info p {
+  margin: 2px 0 0 0;
+  font-size: 0.9rem;
+  color: #ddd;
+}
+
+/* Descrição curta */
+.locality p {
+  padding: 0 12px 10px 12px;
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+/* Tag de gênero */
+.job-type {
+  padding: 0 12px 12px 12px;
+}
+.job-type span {
+  background: #f4c542;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: black;
+}
+
+/* Botão ver mais livros */
+.btnjobs-container {
+  text-align: center;
+}
+.btn-jobs {
+  background: #f4c542;
+  padding: 10px 22px;
+  color: black;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+  display: inline-block;
+}
+.btn-jobs:hover {
+  background: #d1a92d;
+}
+
+footer ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+  margin: 0 0 20px 0;
+  justify-content: center; /* centraliza horizontalmente */
+  overflow-x: visible; /* evita barra horizontal */
+  scrollbar-width: none; /* remove scrollbar no Firefox */
+}
+
+footer ul::-webkit-scrollbar {
+  display: none; /* remove scrollbar no Chrome/Safari */
+}

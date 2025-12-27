@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Página Inicial - Biblioteca</title>
+
+  <link rel="stylesheet" href="/home-page/hmpg.css" />
+
+
+  <!-- Fonte Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    body, button, select, input, h1, h3, p, a {
+      font-family: 'Poppins', sans-serif !important;
+      color: white;
+      margin: 0;
+      padding: 0;
+      background: black;
+    }
+    body {
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    /* Canvas do fundo (sistema solar) */
+    #bg-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+      display: block;
+      background: transparent;
+    }
+
+    nav {
+      z-index: 10;
+      background: rgba(0,0,0,0.85);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 25px;
+      padding: 0;
+      margin: 0;
+    }
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: color 0.3s;
+    }
+    nav ul li a:hover {
+      color: #f4c542;
+    }
+
+    #search-form {
+      position: relative;
+      z-index: 10;
+      flex-grow: 1;
+      max-width: 600px;
+      margin: 80px auto 40px auto; /* deixa espaço para nav fixa no topo */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    #typewriter {
+      font-weight: 600;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: white;
+      min-height: 72px;
+      line-height: 1.2;
+    }
+
+    form {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    form select {
+      padding: 8px 14px;
+      font-size: 1.1rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      min-width: 200px;
+      background: #222;
+      color: white;
+      transition: background-color 0.3s;
+    }
+    form select:hover, form select:focus {
+      background-color: #333;
+      outline: none;
+    }
+
+    form button.botao {
+      background: #f4c542;
+      border: none;
+      padding: 10px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.3s;
+      font-size: 1.1rem;
+      min-width: 120px;
+      color: black;
+    }
+    form button.botao:hover {
+      background: #d1a92d;
+    }
+
+    main {
+      position: relative;
+      z-index: 10;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 50vh;
+      color: white;
+      font-size: 1.2rem;
+      text-align: center;
+      padding: 20px;
+    }
+
+    footer {
+      background: rgba(0,0,0,0.8);
+      padding: 30px 20px;
+      z-index: 10;
+      position: relative;
+      width: 100%;
+      color: white;
+      box-sizing: border-box;
+    }
+
+    footer h1 {
+      font-weight: 600;
+      font-size: 2rem;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+
+    footer ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      padding: 0;
+      margin: 0 0 20px 0;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #f4c542 transparent;
+    }
+    footer ul::-webkit-scrollbar {
+      height: 8px;
+    }
+    footer ul::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    footer ul::-webkit-scrollbar-thumb {
+      background-color: #f4c542;
+      border-radius: 4px;
+    }
+
+    footer ul li {
+      flex: 0 0 auto;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      width: 260px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    footer ul li:hover {
+      transform: scale(1.05);
+    }
+    .company-box {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+    }
+    .company-box img {
+      width: 60px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .company-info h3 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: white;
+    }
+    .company-info p {
+      margin: 2px 0 0 0;
+      font-size: 0.9rem;
+      color: #ddd;
+    }
+    .locality p {
+      padding: 0 12px 10px 12px;
+      font-size: 0.85rem;
+      color: #ccc;
+    }
+    .job-type {
+      padding: 0 12px 12px 12px;
+    }
+    .job-type span {
+      background: #f4c542;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: black;
+    }
+
+    .btnjobs-container {
+      text-align: center;
+    }
+    .btn-jobs {
+      background: #f4c542;
+      padding: 10px 22px;
+      color: black;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background 0.3s ease;
+      display: inline-block;
+    }
+    .btn-jobs:hover {
+      background: #d1a92d;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="bg-canvas"></canvas>
+
+  <nav>
+    <ul>
+      <li><a href="/home-page/login/cadastro/cadastro.html">Cadastro</a></li>
+      <li><a href="/home-page/login/login.html">Login</a></li>
+    </ul>
+  </nav>
+
+  <div id="search-form">
+    <h1 id="typewriter">Explorando o conhecimento, uma página de cada vez</h1>
+
+    <form id="searchForm">
+      <select name="category" id="category" required>
+        <option value="">Selecione uma categoria</option>
+        <option value="aluno">Aluno</option>
+        <option value="professor">Professor</option>
+        <option value="livro">Livros</option>
+        <option value="reserva">Reserva</option>
+        <option value="emprestimo">Empréstimo</option>
+      </select>
+      <button type="submit" class="botao">Pesquisar</button>
+    </form>
+  </div>
+
+  <main>
+    <p>Bem-vindo à Biblioteca! Faça login ou cadastre-se para acessar todo o conteúdo.</p>
+  </main>
+
+  <footer>
+  <h1>Alguns dos nossos Livros</h1>
+  <ul>
+    <li>
+      <a href="#" class="clickarea" data-livro="Monte dos ventos uivantes">
+        <div class="company-box">
+          <img src="/home-page/imagens/livro.webp" alt="Monte dos ventos uivantes" />
+          <div class="company-info">
+            <h3>Monte dos ventos uivantes</h3>
+            <p>Emily Brontë</p>
+          </div>
+        </div>
+        <div class="locality">
+          <p>Amor, vingança, obsessão.</p>
+        </div>
+        <div class="job-type">
+          <span class="clt">tragédia</span>
+        </div>
+      </a>
+    </li>
+
+    <li>
+      <a href="#" class="clickarea" data-livro="O homem mais rico da Babilônia">
+        <div class="company-box">
+          <img src="/home-page/imagens/OHomemMaisRicoDaBabilonia.webp" alt="O homem mais rico da Babilônia" />
+          <div class="company-info">
+            <h3>O homem mais rico da Babilônia</h3>
+            <p>George Samuel Clason</p>
+          </div>
+        </div>
+        <div class="locality">
+          <p>Sabedoria financeira, prosperidade</p>
+        </div>
+        <div class="job-type">
+          <span class="pj">Financeiro</span>
+        </div>
+      </a>
+    </li>
+
+    <li>
+      <a href="#" class="clickarea" data-livro="Meu porto seguro">
+        <div class="company-box">
+          <img src="/home-page/imagens/porto.jpeg" alt="Meu porto seguro" />
+          <div class="company-info">
+            <h3>Meu porto seguro</h3>
+            <p>Mithiele Silva</p>
+          </div>
+        </div>
+        <div class="locality">
+          <p>Superação, amor, recomeços.</p>
+        </div>
+        <div class="job-type">
+          <span class="hf">Romance</span>
+        </div>
+      </a>
+    </li>
+
+    <li>
+      <a href="#" class="clickarea" data-livro="Meditações">
+        <div class="company-box">
+          <img src="/home-page/imagens/MarcoAurelio.webp" alt="Meditações" />
+          <div class="company-info">
+            <h3>Meditações</h3>
+            <p>Marco Aurélio</p>
+          </div>
+        </div>
+        <div class="locality">
+          <p>Reflexão, sabedoria, estoicismo.</p>
+        </div>
+        <div class="job-type">
+          <span class="pj">Filosofia</span>
+        </div>
+      </a>
+    </li>
+  </ul>
+
+  <div class="btnjobs-container">
+    <a href="/home-page/logue.html" class="btn-jobs">Ver mais livros</a>
+  </div>
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script>
+  const canvas = document.getElementById('bg-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x000000, 0);
+
+  const scene = new THREE.Scene();
+
+  // Câmera - Visão Lateral Horizontal
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+  camera.position.set(80, 80, 80);  // Lateral Z, central Y
+  camera.lookAt(0, 0, 0);          // Olha para o centro (onde está o Sol)
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+  scene.add(ambientLight);
+
+  // Sol
+  const sunGeometry = new THREE.SphereGeometry(10, 32, 32);
+  const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xF4C542 });
+  const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+  scene.add(sun);
+
+  const planets = [];
+
+  function createPlanet(size, color, distance, speedFactor) {
+    const geometry = new THREE.SphereGeometry(size, 24, 24);
+    const material = new THREE.MeshStandardMaterial({ color: color, roughness: 0.5, metalness: 0.5 });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.userData = { distance: distance, angle: Math.random() * Math.PI * 2, speed: speedFactor };
+    scene.add(mesh);
+
+    // Linha de órbita (vista lateral - em XZ)
+    const orbitPoints = [];
+    for (let i = 0; i <= 100; i++) {
+      const angle = (i / 100) * Math.PI * 2;
+      orbitPoints.push(new THREE.Vector3(
+        Math.cos(angle) * distance,
+        0,
+        Math.sin(angle) * distance
+      ));
+    }
+    const orbitGeometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
+    const orbitMaterial = new THREE.LineBasicMaterial({ color: 0x888888 });
+    const orbitLine = new THREE.LineLoop(orbitGeometry, orbitMaterial);
+    scene.add(orbitLine);
+
+    return mesh;
+  }
+
+  planets.push(createPlanet(2, 0xaaaaaa, 20, 0.015));  // Mercúrio
+  planets.push(createPlanet(3, 0xff6347, 30, 0.012));  // Vênus
+  planets.push(createPlanet(3.5, 0x0077ff, 40, 0.010)); // Terra
+  planets.push(createPlanet(3, 0xffd700, 50, 0.008));  // Marte
+  planets.push(createPlanet(6, 0xffa500, 70, 0.006));  // Júpiter
+
+  // Estrelas de Fundo
+  const starsGeometry = new THREE.BufferGeometry();
+  const starPositions = [];
+  for (let i = 0; i < 800; i++) {
+    starPositions.push((Math.random() - 0.5) * 1000);
+    starPositions.push((Math.random() - 0.5) * 1000);
+    starPositions.push((Math.random() - 0.5) * 1000);
+  }
+  starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+  const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.7 });
+  const stars = new THREE.Points(starsGeometry, starsMaterial);
+  scene.add(stars);
+
+  // Responsivo
+  window.addEventListener('resize', () => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    renderer.setSize(width, height);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+  });
+
+  // Animação
+  function animate() {
+    requestAnimationFrame(animate);
+
+    planets.forEach(p => {
+      p.userData.angle += p.userData.speed;
+      p.position.x = Math.cos(p.userData.angle) * p.userData.distance;
+      p.position.z = Math.sin(p.userData.angle) * p.userData.distance;
+      p.position.y = 0; // Mantém os planetas sempre no mesmo plano horizontal (XZ)
+    });
+
+    renderer.render(scene, camera);
+  }
+  animate();
+</script>
+
+<script>
+  // Typewriter - Igual ao home-page-logado
+  const text = [
+    "Explorando o conhecimento,",
+    "uma página de cada vez."
+  ];
+  const speed = 50;
+  let lineIndex = 0;
+  let charIndex = 0;
+
+  function typeEffect() {
+    const container = document.getElementById("typewriter");
+    if (lineIndex < text.length) {
+      if (charIndex < text[lineIndex].length) {
+        container.innerHTML += text[lineIndex].charAt(charIndex);
+        charIndex++;
+        setTimeout(typeEffect, speed);
+      } else {
+        if (lineIndex === 0) container.innerHTML += "<br>";
+        lineIndex++;
+        charIndex = 0;
+        setTimeout(typeEffect, speed);
+      }
+    }
+  }
+
+  document.getElementById("typewriter").innerHTML = "";
+  typeEffect();
+</script>
+
+<script>
+  // Redirecionamento da Pesquisa
+  document.getElementById('searchForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const categoria = document.getElementById('category').value;
+    let paginaDestino = '';
+
+    switch (categoria) {
+      case 'aluno':
+        paginaDestino = '/home-page/logue.html';
+        break;
+      case 'professor':
+        paginaDestino = '/home-page/logue.html';
+        break;
+      case 'livro':
+        paginaDestino = '/home-page/logue.html';
+        break;
+      case 'reserva':
+        paginaDestino = '/home-page/logue.html';
+        break;
+      case 'emprestimo':
+        paginaDestino = '/home-page/logue.html';
+        break;
+      default:
+        alert('Categoria inválida!');
+        return;
+    }
+
+    window.location.href = `${paginaDestino}?categoria=${encodeURIComponent(categoria)}`;
+  });
+</script>
+
+</body>
+</html>

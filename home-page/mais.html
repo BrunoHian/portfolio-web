@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login / Transição de Vídeos</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      position: relative;
+    }
+
+    /* Ambos os vídeos de fundo ocupam toda a tela esticados */
+    .bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill; /* Aqui estica tudo */
+      object-position: center center;
+      z-index: -2;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+    }
+
+    /* Camada escura sobre o vídeo */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    /* Botões no topo */
+    .container {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .btn {
+      padding: 15px 35px;
+      font-size: 1.3em;
+      color: #fff;
+      background: linear-gradient(45deg, #ff4500, #ffa500);
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255, 140, 0, 0.5);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(255, 140, 0, 0.8);
+    }
+
+    /* Rodapé */
+    footer {
+      width: 100%;
+      padding: 15px 10px;
+      text-align: center;
+      color: #fff;
+      font-size: 1em;
+      background: rgba(0,0,0,0.6);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      box-sizing: border-box;
+      user-select: none;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      line-height: 1.4;
+    }
+
+    footer .author {
+      margin-top: 5px;
+      font-weight: 700;
+      font-size: 0.9em;
+    }
+
+    footer .team-help {
+      margin-top: 2px;
+      font-weight: 300;
+      font-size: 0.8em;
+      font-style: italic;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 400px) {
+      .btn {
+        font-size: 1em;
+        padding: 12px 25px;
+      }
+      footer {
+        font-size: 0.85em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dois vídeos de fundo -->
+  <video class="bg-video" id="video1" autoplay muted></video>
+  <video class="bg-video" id="video2" autoplay muted></video>
+
+  <div class="overlay">
+    <div class="container">
+      <a href="/home-page/login/login.html" class="btn">Login</a>
+      <a href="/home-page/login/cadastro/cadastro.html" class="btn">Cadastrar</a>
+    </div>
+  </div>
+
+  <footer>
+    Depois de exatas 28 horas fazendo tudo, finalmente está pronto. Agora me sinto bem.
+    <div class="author">Bruno Hian Leite Barros</div>
+    <div class="team-help">Com uma pequenina ajuda da equipe.</div>
+  </footer>
+
+  <script>
+    const videos = [
+      "/home-page/imagens/Download (1).mp4",
+      "/home-page/imagens/Download (2).mp4"
+    ];
+
+    let currentIndex = 0;
+    const videoElements = [
+      document.getElementById('video1'),
+      document.getElementById('video2')
+    ];
+
+    function playVideo(index) {
+      let currentVideo = videoElements[index % 2];
+      let nextVideo = videoElements[(index + 1) % 2];
+
+      // Configura o vídeo atual
+      currentVideo.src = videos[index % videos.length];
+      currentVideo.load();
+      currentVideo.style.opacity = 1;
+      currentVideo.play();
+
+      // Faz o fade out do outro vídeo
+      nextVideo.pause();
+      nextVideo.style.opacity = 0;
+
+      // Quando o vídeo acabar, chama o próximo
+      currentVideo.onended = () => {
+        playVideo((index + 1) % videos.length);
+      };
+    }
+
+    // Iniciar com o primeiro vídeo
+    playVideo(0);
+  </script>
+
+</body>
+</html>

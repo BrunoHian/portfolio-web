@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Logout</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-top: 50px;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #d32f2f;
+      }
+    </style>
+</head>
+<body>
+
+    <h1>Você foi desconectado com sucesso!</h1>
+    <p><a href="/home-page/hmpg.html">Voltar para a página inicial</a></p>
+
+    <button id="logoutButton">Fazer logout novamente</button>
+
+    <script>
+      document.getElementById('logoutButton').addEventListener('click', () => {
+        // Limpa o localStorage (remove o usuário logado)
+        localStorage.clear();
+
+        // Redireciona para a home page
+        window.location.href = "/home-page/hmpg.html";
+      });
+
+      // Opcional: também fazer logout automaticamente ao abrir essa página
+      localStorage.clear();
+    </script>
+
+</body>
+</html>

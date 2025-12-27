@@ -1,0 +1,157 @@
+/* Fundo animado permanece igual */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Open Sans', sans-serif;
+  background-color: #000;
+  position: relative;
+  color: white;
+}
+
+/* Planeta */
+body::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 300px;
+  margin-left: -150px;
+  margin-top: -150px;
+  background: radial-gradient(circle at center, #2e3a59 70%, #000 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 60px 20px rgba(46, 58, 89, 0.7);
+  z-index: -2;
+}
+
+/* Lua orbitando */
+body::after {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin-left: 150px;
+  margin-top: -20px;
+  background: radial-gradient(circle at center, #ccc, #888);
+  border-radius: 50%;
+  box-shadow: 0 0 10px 2px #ccc;
+  animation: orbitar 6s linear infinite;
+  z-index: -1;
+}
+
+@keyframes orbitar {
+  0% {
+    transform: rotate(0deg) translateX(150px) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(150px) rotate(-360deg);
+  }
+}
+
+/* Logo no canto superior esquerdo */
+.logo {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  width: 120px; /* ajuste o tamanho como quiser */
+  height: auto;
+  z-index: 10;
+  cursor: pointer;
+}
+
+/* Container da tabela */
+.container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 20px auto 40px auto; /* menos margem superior para subir */
+  background: transparent;
+  position: relative;
+  z-index: 1;
+  /* Se quiser subir mais, diminua o margin-top */
+}
+
+/* Tabela transparente e estilizada */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(5px);
+  box-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+/* Cabeçalho */
+th {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 10px;
+  text-align: left;
+}
+
+/* Células */
+td {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  color: white;
+}
+
+/* Botões */
+button {
+  background-color: rgba(33, 150, 243, 0.6);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: rgba(33, 150, 243, 0.9);
+}
+
+/* Inputs */
+input, form {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px;
+  border-radius: 4px;
+  backdrop-filter: blur(5px);
+  margin-right: 8px;
+}
+
+input::placeholder {
+  color: rgba(255,255,255,0.7);
+}
+
+
+/* Logo fixa no canto superior esquerdo */
+.logo {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  width: 150px;  /* Ajuste o tamanho se quiser */
+  height: auto;
+  z-index: 20; /* acima do conteúdo */
+  cursor: pointer;
+}
+
+/* Container da tabela mais para cima */
+.container {
+  position: relative;
+  z-index: 10; /* na frente do canvas */
+  max-width: 1200px;
+  margin: 70px auto 20px auto; /* margem superior reduzida para subir a tabela e afastar da logo */
+  background-color: rgba(255, 255, 255, 0.15); /* transparente com leve branco */
+  backdrop-filter: blur(10px); /* vidro fosco */
+  border-radius: 10px;
+  padding: 20px;
+  color: white;
+}

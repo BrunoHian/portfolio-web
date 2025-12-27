@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reservas - Biblioteca</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+    }
+    #searchForm {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #searchInput {
+      padding: 8px;
+      width: 300px;
+      border-radius: 4px;
+      border: none;
+      font-size: 1rem;
+    }
+    button {
+      padding: 8px 16px;
+      margin-left: 8px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background-color: #f4c542;
+      color: black;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #d1a92d;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #222;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #444;
+      text-align: center;
+    }
+    th {
+      background-color: #333;
+    }
+    tr:hover {
+      background-color: #444;
+    }
+    .no-results {
+      text-align: center;
+      padding: 20px;
+      color: #aaa;
+    }
+
+    /* Botões pequenos na tabela */
+    .btn-status {
+      margin: 0 4px;
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    .btn-entregue {
+      background-color: #4caf50;
+    }
+    .btn-entregue:hover {
+      background-color: #388e3c;
+    }
+    .btn-perdido {
+      background-color: #f44336;
+    }
+    .btn-perdido:hover {
+      background-color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Reservas</h2>
+
+  <form id="searchForm">
+    <input type="text" id="searchInput" placeholder="Pesquisar por usuário, livro ou status..." />
+    <button type="submit">Pesquisar</button>
+    <button type="button" id="btnClearSearch">Limpar</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Usuário</th>
+        <th>Livro</th>
+        <th>Data da Reserva</th>
+        <th>Status</th>
+        <th>Ações</th> <!-- Nova coluna para botões -->
+      </tr>
+    </thead>
+    <tbody id="reservasTableBody">
+      <!-- Dados aparecem aqui -->
+    </tbody>
+  </table>
+
+  <script>
+    const reservasTableBody = document.getElementById('reservasTableBody');
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const btnClearSearch = document.getElementById('btnClearSearch');
+
+    async function carregarReservas(q = '') {
+      try {
+        const url = q ? `/api/reservas12?q=${encodeURIComponent(q)}` : '/api/reservas12';
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
+
+        const data = await res.json();
+        montarTabelaReservas(data.resultados);
+      } catch (error) {
+        console.error('Erro ao carregar reservas:', error);
+        reservasTableBody.innerHTML = `<tr><td colspan="6" class="no-results">Erro ao carregar reservas.</td></tr>`;
+      }
+    }
+
+    function montarTabelaReservas(reservas) {
+      reservasTableBody.innerHTML = '';
+
+      if (!reservas || reservas.length === 0) {
+        reservasTableBody.innerHTML = `<tr><td colspan="6" class="no-results">Nenhuma reserva encontrada.</td></tr>`;
+        return;
+      }
+
+      reservas.forEach(({ id, nome_usuario, titulo_livro, data_reserva, status }) => {
+        const row = document.createElement('tr');
+
+        // Formatando data para dd/mm/yyyy
+        let dataFormatada = data_reserva ? new Date(data_reserva).toLocaleDateString('pt-BR') : '—';
+
+        row.innerHTML = `
+          <td>${id}</td>
+          <td>${nome_usuario || '—'}</td>
+          <td>${titulo_livro || '—'}</td>
+          <td>${dataFormatada}</td>
+          <td>${status || '—'}</td>
+          <td>
+            <button class="btn-status btn-entregue" data-id="${id}">Entregue</button>
+            <button class="btn-status btn-perdido" data-id="${id}">Perdido</button>
+          </td>
+        `;
+
+        reservasTableBody.appendChild(row);
+      });
+
+      // Adiciona os listeners dos botões
+      document.querySelectorAll('.btn-entregue').forEach(btn => {
+        btn.addEventListener('click', () => atualizarStatus(btn.dataset.id, 'entregue'));
+      });
+
+      document.querySelectorAll('.btn-perdido').forEach(btn => {
+        btn.addEventListener('click', () => atualizarStatus(btn.dataset.id, 'perdido'));
+      });
+    }
+
+    async function atualizarStatus(id, novoStatus) {
+      try {
+        const url = `/api/reservas12/${id}/${novoStatus}`; // Ajuste a rota conforme seu backend
+        const res = await fetch(url, {
+          method: 'POST'
+        });
+        if (!res.ok) throw new Error(`Erro HTTP: ${res.status}`);
+
+        alert(`Status atualizado para "${novoStatus}" com sucesso!`);
+        carregarReservas(searchInput.value.trim()); // Recarrega a tabela com filtro atual
+      } catch (error) {
+        console.error(`Erro ao atualizar status para ${novoStatus}:`, error);
+        alert('Erro ao atualizar status. Tente novamente.');
+      }
+    }
+
+    searchForm.addEventListener('submit', e => {
+      e.preventDefault();
+      carregarReservas(searchInput.value.trim());
+    });
+
+    btnClearSearch.addEventListener('click', () => {
+      searchInput.value = '';
+      carregarReservas();
+    });
+
+    // Carrega inicialmente todas as reservas
+    carregarReservas();
+  </script>
+
+</body>
+</html>

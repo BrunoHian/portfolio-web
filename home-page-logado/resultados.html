@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados da Pesquisa</title>
+    <link rel="stylesheet" href="/home-page-logado/home-page-logado.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav>
+                <img src="/home-page/imagens/logo_biblioteca.png" alt="Logo Biblioteca" id="logo">
+                <div class="nav-container">
+                    <ul>
+                        <li><a href="/home-page-logado/home-page-logado.html">Início</a></li>
+                        <button onclick="window.location.href='/logout'">Logout</button>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <h1>Resultados da Pesquisa</h1>
+            <div id="resultados">
+                <!-- Resultados serão inseridos aqui -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category');
+        const query = urlParams.get('q'); // Corrigido: era 'query'
+
+        if (category && query) {
+            fetch(`/pesquisar?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('resultados');
+                    if (!Array.isArray(data) || data.length === 0) {
+                        container.innerHTML = '<p>Nenhum resultado encontrado.</p>';
+                        return;
+                    }
+
+                    let tableHTML = `<table><thead><tr>`;
+                    let rowsHTML = '';
+
+                    if (category === 'Aluno') {
+                        tableHTML += `
+                            <th>Nome</th>
+                            <th>Matrícula</th>
+                            <th>Curso</th>
+                            <th>Ações</th>
+                        </tr></thead><tbody>`;
+
+                        data.forEach(item => {
+                            rowsHTML += `
+                                <tr>
+                                    <td>${item.nome}</td>
+                                    <td>${item.matricula}</td>
+                                    <td>${item.curso || '---'}</td>
+                                    <td>
+                                        <button onclick="editarAluno(${item.id})">Editar</button>
+                                        <button onclick="excluirAluno(${item.id})">Excluir</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    } 
+                    // Outras categorias, se quiser manter
+                    else if (category === 'Professor') {
+                        tableHTML += `
+                            <th>Nome</th>
+                            <th>Matéria</th>
+                            <th>Email</th>
+                        </tr></thead><tbody>`;
+
+                        data.forEach(item => {
+                            rowsHTML += `
+                                <tr>
+                                    <td>${item.nome}</td>
+                                    <td>${item.materia}</td>
+                                    <td>${item.email}</td>
+                                </tr>
+                            `;
+                        });
+                    } 
+                    else if (category === 'Livro') {
+                        tableHTML += `
+                            <th>Título</th>
+                            <th>Autor</th>
+                            <th>Categoria</th>
+                        </tr></thead><tbody>`;
+
+                        data.forEach(item => {
+                            rowsHTML += `
+                                <tr>
+                                    <td>${item.titulo}</td>
+                                    <td>${item.autor}</td>
+                                    <td>${item.categoria}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+
+                    tableHTML += rowsHTML + '</tbody></table>';
+
+                    // Se for aluno, adiciona botão "Adicionar Aluno"
+                    if (category === 'Aluno') {
+                        tableHTML = `
+                            <button onclick="window.location.href='/cadastro-aluno.html'">Adicionar Aluno</button>
+                            <br><br>
+                        ` + tableHTML;
+                    }
+
+                    container.innerHTML = tableHTML;
+                })
+                .catch(error => {
+                    console.error('Erro ao fazer a pesquisa:', error);
+                    document.getElementById('resultados').innerHTML = '<p>Erro ao buscar resultados.</p>';
+                });
+        }
+
+        function editarAluno(id) {
+            window.location.href = `/editar-aluno.html?id=${id}`;
+        }
+
+        function excluirAluno(id) {
+            if (confirm('Tem certeza que deseja excluir este aluno?')) {
+                fetch(`/alunos/excluir/${id}`, { method: 'DELETE' })
+                    .then(res => res.json())
+                    .then(res => {
+                        alert(res.mensagem || 'Aluno excluído.');
+                        location.reload();
+                    })
+                    .catch(err => {
+                        console.error('Erro ao excluir aluno:', err);
+                        alert('Erro ao excluir aluno.');
+                    });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cadastro Funcionário</title>
+    <link rel="stylesheet" href="cadastro-funcionario.css" />
+</head>
+<body>
+    <a href="/home-page/hmpg.html">
+        <img src="../../../imagens/logo_biblioteca.png" alt="" id="logo" />
+    </a>
+
+    <form id="formCadastro">
+        <div class="titulo">
+            <h1>Faça seu cadastro</h1>
+            <p>Funcionário</p>
+            <div class="barra-horizontal"></div>
+        </div>
+
+        <div class="campo-input">
+            <label for="nome">Seu nome*</label>
+            <input type="text" id="nome" name="nome" required />
+        </div>
+        <div class="campo-input">
+            <label for="matricula">Sua matrícula*</label>
+            <input type="text" id="matricula" name="matricula" required />
+        </div>
+        <div class="campo-input">
+            <label for="cpf">Seu CPF*</label>
+            <input type="text" id="cpf" name="cpf" placeholder="XXX.XXX.XXX-XX" maxlength="14" required />
+        </div>
+        <div class="campo-input">
+            <label for="email">Seu e-mail*</label>
+            <input type="email" id="email" name="email" required />
+        </div>
+        <div class="campo-input">
+            <label for="senha">Sua senha*</label>
+            <input type="password" id="senha" name="senha" required />
+        </div>
+        <div class="campo-input">
+            <label for="funcao">Sua função*</label>
+            <input type="text" id="funcao" name="funcao" required />
+        </div>
+        <div class="campo-input">
+            <label for="telefone">Seu telefone*</label>
+            <input type="tel" id="telefone" name="telefone" placeholder="(XX) XXXXX-XXXX" maxlength="15" required />
+        </div>
+
+        <button type="submit">Criar</button>
+        <p>
+            Já tem uma conta?
+            <a href="../../login.html">Login</a>
+        </p>
+    </form>
+
+    <script>
+      // Máscara CPF
+      document.getElementById('cpf').addEventListener('input', function (event) {
+        let cpf = event.target.value.replace(/\D/g, '');
+        if (cpf.length <= 3) {
+          cpf = cpf.replace(/(\d{3})/, '$1');
+        } else if (cpf.length <= 6) {
+          cpf = cpf.replace(/(\d{3})(\d{3})/, '$1.$2');
+        } else if (cpf.length <= 9) {
+          cpf = cpf.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+        } else {
+          cpf = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+        }
+        event.target.value = cpf;
+      });
+
+      // Máscara telefone
+      document.getElementById('telefone').addEventListener('input', function (event) {
+        let phoneNumber = event.target.value.replace(/\D/g, '');
+        if (phoneNumber.length <= 2) {
+          phoneNumber = phoneNumber.replace(/(\d{2})/, '($1)');
+        } else if (phoneNumber.length <= 7) {
+          phoneNumber = phoneNumber.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+        } else {
+          phoneNumber = phoneNumber.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        }
+        event.target.value = phoneNumber;
+      });
+
+      // Envio assíncrono do formulário com popup
+      const form = document.getElementById('formCadastro');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        data.tipo = "funcionario"; // Garantindo o tipo
+
+        try {
+          const response = await fetch('/cadastro-funcionario', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+
+          if (response.ok) {
+            showPopup('Funcionário cadastrado com sucesso!');
+            form.reset();
+          } else {
+            const errorText = await response.text();
+            showPopup('Erro: ' + errorText);
+          }
+        } catch (error) {
+          showPopup('Erro ao conectar com o servidor.');
+        }
+      });
+
+      function showPopup(message) {
+        let popup = document.createElement('div');
+        popup.textContent = message;
+        popup.style.position = 'fixed';
+        popup.style.top = '20px';
+        popup.style.left = '50%';
+        popup.style.transform = 'translateX(-50%)';
+        popup.style.backgroundColor = '#333';
+        popup.style.color = 'white';
+        popup.style.padding = '15px 25px';
+        popup.style.borderRadius = '8px';
+        popup.style.zIndex = '1000';
+        popup.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+        popup.style.fontSize = '16px';
+
+        document.body.appendChild(popup);
+
+        setTimeout(() => {
+          popup.remove();
+        }, 3000);
+      }
+    </script>
+</body>
+</html>

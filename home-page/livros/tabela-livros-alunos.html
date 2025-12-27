@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tabela de Livros - Fundo Terra 2D</title>
+  <link rel="stylesheet" href="/home-page/livros/tab-livros.css" />
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    /* Fundo com a Terra */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg') no-repeat center center;
+      background-size: cover;
+      filter: brightness(0.5);
+      animation: fundoTerra 30s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes fundoTerra {
+      0% { background-position: center top; }
+      50% { background-position: center bottom; }
+      100% { background-position: center top; }
+    }
+
+    /* Logo no canto superior esquerdo */
+    #logo {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      max-width: 120px;
+      z-index: 2;
+    }
+
+    .container {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.6);
+      overflow-y: auto;
+      max-height: 90vh;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      background-color: rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    th {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    button {
+      padding: 6px 12px;
+      margin: 2px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+
+    #btnAdicionar {
+      display: none; /* escondendo o botão */
+    }
+
+    /* Esconde o formulário inicialmente */
+    #formContainer {
+      display: none; /* escondendo o formulário */
+    }
+
+    input, select {
+      margin: 5px 0;
+      padding: 6px;
+      width: 100%;
+      border-radius: 4px;
+      border: none;
+    }
+
+    input, select, button {
+      font-size: 14px;
+    }
+
+    #searchForm input {
+      width: 200px;
+      padding: 6px;
+    }
+
+    #searchForm button {
+      margin-left: 5px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<a href="/home-page-logado/home-page-logado.html">
+  <img src="/home-page/imagens/logo_biblioteca.png" id="logo" alt="Logo da Biblioteca" />
+</a>
+
+<div class="container">
+  <h2>Tabela de Livros</h2>
+
+  <form id="searchForm">
+    <input type="text" id="searchInput" placeholder="Pesquisar por título..." />
+    <button type="submit">Pesquisar</button>
+    <button type="button" id="btnLimparBusca">Limpar</button>
+  </form>
+
+  <table id="livrosTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Autor</th>
+        <th>Editora</th>
+        <th>Ano</th>
+        <th>ISBN</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+const livrosTableBody = document.querySelector('#livrosTable tbody');
+const searchForm = document.getElementById('searchForm');
+const searchInput = document.getElementById('searchInput');
+const btnLimparBusca = document.getElementById('btnLimparBusca');
+
+async function carregarLivros(query = '') {
+  try {
+    const response = await fetch(`/pesquisar-livros?q=${encodeURIComponent(query)}`);
+    if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+    const data = await response.json();
+    montarTabelaLivros(data.resultados || []);
+  } catch (error) {
+    console.error('Erro ao carregar livros:', error);
+    alert('Erro ao carregar livros.');
+  }
+}
+
+function montarTabelaLivros(livros) {
+  livrosTableBody.innerHTML = '';
+
+  if (livros.length === 0) {
+    livrosTableBody.innerHTML = '<tr><td colspan="6">Nenhum livro encontrado.</td></tr>';
+    return;
+  }
+
+  livros.forEach(livro => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${livro.id}</td>
+      <td>${livro.titulo}</td>
+      <td>${livro.autor}</td>
+      <td>${livro.editora_nome || ''}</td>
+      <td>${livro.ano_publicacao || ''}</td>
+      <td>${livro.isbn}</td>
+    `;
+    livrosTableBody.appendChild(row);
+  });
+}
+
+searchForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  carregarLivros(searchInput.value.trim());
+});
+
+btnLimparBusca.addEventListener('click', () => {
+  searchInput.value = '';
+  carregarLivros('');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  carregarLivros();
+});
+</script>
+
+</body>
+</html>

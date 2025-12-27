@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tabela de Livros - Fundo Terra 2D</title>
+  <link rel="stylesheet" href="/home-page/livros/tab-livros.css" />
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    /* Fundo com a Terra */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg') no-repeat center center;
+      background-size: cover;
+      filter: brightness(0.5);
+      animation: fundoTerra 30s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes fundoTerra {
+      0% { background-position: center top; }
+      50% { background-position: center bottom; }
+      100% { background-position: center top; }
+    }
+
+    /* Logo no canto superior esquerdo */
+    #logo {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      max-width: 120px;
+      z-index: 2;
+    }
+
+    .container {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.6);
+      overflow-y: auto;
+      max-height: 90vh;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      background-color: rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    th {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    button {
+      padding: 6px 12px;
+      margin: 2px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+
+    button.edit-btn { background-color: #4CAF50; color: white; }
+    button.remove-btn { background-color: #f44336; color: white; }
+    #btnAdicionar { background-color: #2196F3; color: white; }
+
+    /* Esconde o formulário inicialmente */
+    #formContainer.hidden {
+      display: none;
+    }
+
+    #formContainer {
+      margin-top: 15px;
+      padding: 15px;
+      border: 1px solid #555;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+
+    input, select {
+      margin: 5px 0;
+      padding: 6px;
+      width: 100%;
+      border-radius: 4px;
+      border: none;
+    }
+
+    input, select, button {
+      font-size: 14px;
+    }
+
+    #searchForm input {
+      width: 200px;
+      padding: 6px;
+    }
+
+    #searchForm button {
+      margin-left: 5px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<a href="/home-page-logado/home-page-logado.html">
+  <img src="/home-page/imagens/logo_biblioteca.png" id="logo" alt="Logo da Biblioteca" />
+</a>
+
+<div class="container">
+  <h2>Tabela de Livros</h2>
+
+  <form id="searchForm">
+    <input type="text" id="searchInput" placeholder="Pesquisar por título..." />
+    <button type="submit">Pesquisar</button>
+    <button type="button" id="btnLimparBusca">Limpar</button>
+  </form>
+
+  <button id="btnAdicionar">Adicionar Livro</button>
+
+  <div id="formContainer" class="hidden">
+    <h3>Adicionar/Editar Livro</h3>
+    <form id="addForm">
+      <input type="hidden" id="livroId" />
+      <input type="text" id="titulo" placeholder="Título" required />
+      <input type="text" id="autor" placeholder="Autor" required />
+      <select id="editora_id" required>
+        <option value="">Selecione a editora</option>
+      </select>
+      <input type="number" id="ano_publicacao" placeholder="Ano de Publicação" required min="1000" max="9999" />
+      <input type="text" id="isbn" placeholder="ISBN" required />
+      <button type="submit">Salvar</button>
+      <button type="button" id="btnCancelarFormulario">Cancelar</button>
+    </form>
+  </div>
+
+  <table id="livrosTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Autor</th>
+        <th>Editora</th>
+        <th>Ano</th>
+        <th>ISBN</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+const formContainer = document.getElementById('formContainer');
+const addForm = document.getElementById('addForm');
+const livrosTableBody = document.querySelector('#livrosTable tbody');
+const searchForm = document.getElementById('searchForm');
+const searchInput = document.getElementById('searchInput');
+const btnLimparBusca = document.getElementById('btnLimparBusca');
+const btnAdicionar = document.getElementById('btnAdicionar');
+const btnCancelarFormulario = document.getElementById('btnCancelarFormulario');
+const selectEditora = document.getElementById('editora_id');
+
+function getParametroURL(nome) {
+  const params = new URLSearchParams(window.location.search);
+  return params.get(nome) || '';
+}
+
+async function carregarEditoras() {
+  try {
+    const res = await fetch('/editoras');
+    if (!res.ok) throw new Error('Erro ao buscar editoras');
+    const editoras = await res.json();
+
+    selectEditora.innerHTML = '<option value="">Selecione a editora</option>';
+    editoras.forEach(editora => {
+      const option = document.createElement('option');
+      option.value = editora.id;
+      option.textContent = editora.nome;
+      selectEditora.appendChild(option);
+    });
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao carregar editoras');
+  }
+}
+
+function mostrarFormularioAdicionar(livro = null) {
+  formContainer.classList.remove('hidden');
+  if (livro) {
+    document.getElementById('livroId').value = livro.id || '';
+    document.getElementById('titulo').value = livro.titulo || '';
+    document.getElementById('autor').value = livro.autor || '';
+    selectEditora.value = livro.editora_id || '';
+    document.getElementById('ano_publicacao').value = livro.ano_publicacao || '';
+    document.getElementById('isbn').value = livro.isbn || '';
+  } else {
+    addForm.reset();
+    document.getElementById('livroId').value = '';
+  }
+}
+
+function cancelarFormulario() {
+  formContainer.classList.add('hidden');
+  addForm.reset();
+}
+
+async function carregarLivros(query = '') {
+  try {
+    const response = await fetch(`/pesquisar-livros?q=${encodeURIComponent(query)}`);
+    if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+    const data = await response.json();
+    montarTabelaLivros(data.resultados || []);
+  } catch (error) {
+    console.error('Erro ao carregar livros:', error);
+    alert('Erro ao carregar livros.');
+  }
+}
+
+function montarTabelaLivros(livros) {
+  livrosTableBody.innerHTML = '';
+
+  if (livros.length === 0) {
+    livrosTableBody.innerHTML = '<tr><td colspan="7">Nenhum livro encontrado.</td></tr>';
+    return;
+  }
+
+  livros.forEach(livro => {
+    const row = document.createElement('tr');
+
+    const btnEditar = document.createElement('button');
+    btnEditar.textContent = 'Editar';
+    btnEditar.className = 'edit-btn';
+    btnEditar.addEventListener('click', () => editarLivro(livro));
+
+    const btnRemover = document.createElement('button');
+    btnRemover.textContent = 'Remover';
+    btnRemover.className = 'remove-btn';
+    btnRemover.addEventListener('click', () => removerLivro(livro.id));
+
+    row.innerHTML = `
+      <td>${livro.id}</td>
+      <td>${livro.titulo}</td>
+      <td>${livro.autor}</td>
+      <td>${livro.editora_nome || ''}</td>
+      <td>${livro.ano_publicacao || ''}</td>
+      <td>${livro.isbn}</td>
+      <td></td>
+    `;
+
+    row.querySelector('td:last-child').appendChild(btnEditar);
+    row.querySelector('td:last-child').appendChild(btnRemover);
+
+    livrosTableBody.appendChild(row);
+  });
+}
+
+function editarLivro(livro) {
+  mostrarFormularioAdicionar(livro);
+}
+
+async function removerLivro(id) {
+  if (!confirm('Tem certeza que deseja remover este livro?')) return;
+
+  try {
+    const response = await fetch(`/remover-livro/${id}`, { method: 'DELETE' });
+    const data = await response.json();
+    if (data.success) {
+      alert('Livro removido com sucesso!');
+      carregarLivros(searchInput.value.trim());
+    } else {
+      alert('Erro ao remover livro');
+    }
+  } catch (error) {
+    console.error('Erro ao remover livro:', error);
+    alert('Erro ao remover livro.');
+  }
+}
+
+addForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const livro = {
+    id: document.getElementById('livroId').value,
+    titulo: document.getElementById('titulo').value.trim(),
+    autor: document.getElementById('autor').value.trim(),
+    editora_id: parseInt(selectEditora.value, 10),
+    ano_publicacao: parseInt(document.getElementById('ano_publicacao').value, 10),
+    isbn: document.getElementById('isbn').value.trim()
+  };
+
+  if (!livro.titulo || !livro.autor || !livro.editora_id || !livro.ano_publicacao || !livro.isbn) {
+    alert('Preencha todos os campos corretamente.');
+    return;
+  }
+
+  const method = livro.id ? 'PUT' : 'POST';
+  const url = livro.id ? '/editar-livro' : '/adicionar-livro';
+
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(livro)
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      alert('Livro salvo com sucesso!');
+      carregarLivros(searchInput.value.trim());
+      cancelarFormulario();
+    } else {
+      alert(data.message || 'Erro ao salvar livro');
+    }
+  } catch (error) {
+    console.error('Erro ao salvar livro:', error);
+    alert('Erro ao salvar livro.');
+  }
+});
+
+searchForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  carregarLivros(searchInput.value.trim());
+});
+
+btnLimparBusca.addEventListener('click', () => {
+  searchInput.value = '';
+  carregarLivros();
+});
+
+btnAdicionar.addEventListener('click', () => mostrarFormularioAdicionar());
+btnCancelarFormulario.addEventListener('click', cancelarFormulario);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const termoBusca = getParametroURL('q');
+  if (termoBusca) {
+    searchInput.value = termoBusca;
+    carregarLivros(termoBusca);
+  } else {
+    carregarLivros();
+  }
+  carregarEditoras();
+});
+</script>
+
+</body>
+</html>

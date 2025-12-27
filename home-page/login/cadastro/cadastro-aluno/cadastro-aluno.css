@@ -1,0 +1,154 @@
+/* Fundo geral e fonte */
+body, html {
+  margin: 0;
+  padding: 0;
+  background-color: #121212; /* fundo escuro */
+  color: #f4c542; /* amarelo suave para texto */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Logo fixo no topo esquerdo */
+#logo {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 120px;
+  filter: drop-shadow(0 0 8px #f4c542);
+  z-index: 10;
+}
+
+/* Formulário estilo vidro fosco */
+form#formCadastro {
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 30px 40px;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(244, 197, 66, 0.5);
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+  color: #f4c542;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Título e barra */
+.titulo h1 {
+  font-weight: 700;
+  font-size: 1.8rem;
+  margin: 0;
+  text-align: center;
+  color: #f4c542;
+  letter-spacing: 1px;
+}
+
+.titulo p {
+  text-align: center;
+  margin: 5px 0 15px 0;
+  color: #f4c542;
+  font-weight: 600;
+}
+
+.barra-horizontal {
+  width: 200px;
+  height: 5px;
+  background-color: #f4c542;
+  margin: 0 auto 20px auto;
+  border-radius: 3px;
+}
+
+/* Campos do formulário */
+.campo-input {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #f4c542;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"] {
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: none;
+  background-color: #222;
+  color: #f4c542;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  outline: none;
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="tel"]::placeholder {
+  color: #f4c542aa;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="tel"]:focus {
+  background-color: #3a0e0e;
+  box-shadow: 0 0 6px #f4c542;
+}
+
+/* Botão */
+button[type="submit"] {
+  padding: 14px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(90deg, #f4c542, #d1a92d);
+  color: #121212;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 5px 15px rgba(244, 197, 66, 0.7);
+}
+
+button[type="submit"]:hover {
+  background: linear-gradient(90deg, #d1a92d, #f4c542);
+  box-shadow: 0 8px 25px rgba(209, 169, 45, 0.9);
+}
+
+/* Parágrafo com link */
+form p {
+  text-align: center;
+  color: #f4c542;
+  font-weight: 600;
+  margin-top: 20px;
+}
+
+form p a {
+  color: #f4c542;
+  text-decoration: underline;
+}
+
+form p a:hover {
+  color: #d1a92d;
+}
+
+/* Responsivo */
+@media (max-width: 460px) {
+  form#formCadastro {
+    padding: 25px 20px;
+    width: 90%;
+  }
+  #logo {
+    width: 100px;
+  }
+}

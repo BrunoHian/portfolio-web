@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tabela de Alunos</title>
+    <link rel="stylesheet" href="/home-page/alunos/tab-alunos.css" />
+
+    <style>
+      /* Faz o canvas ocupar toda a tela atrás do conteúdo */
+      body, html {
+        margin: 0; 
+        padding: 0; 
+        height: 100%;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        background: black;
+      }
+
+      #bg-canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0; /* atrás */
+        display: block;
+      }
+
+      .container {
+        position: relative;
+        z-index: 10; /* na frente do canvas */
+        max-width: 1200px;
+        margin: 20px auto;
+        background-color: rgba(255, 255, 255, 0.15); /* transparente com leve branco */
+        backdrop-filter: blur(10px); /* vidro fosco */
+        border-radius: 10px;
+        padding: 20px;
+        color: white;
+      }
+
+      table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        background: transparent !important;
+        color: white;
+      }
+
+      th, td { 
+        border: 1px solid rgba(255,255,255,0.3); 
+        padding: 8px; 
+      }
+      th { 
+        background-color: rgba(255,255,255,0.2); 
+      }
+
+      /* Esconde o fundo branco padrão dos inputs e torna texto branco */
+      input {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+      }
+      input::placeholder {
+        color: #ddd;
+      }
+
+      a#logo {
+          position: fixed;   
+          top: 10px;         
+          left: 10px;        
+          z-index: 1000;     
+          width: 150px;
+          margin: 0;         
+          display: block;
+      }
+      a#logo img {
+        width: 100%;
+        height: auto;
+      }
+
+      /* Ocultar botões (removidos do HTML) */
+      /* Não há botões na tabela nem formulário */
+    </style>
+</head>
+<body>
+
+  <canvas id="bg-canvas"></canvas>
+
+  <a href="/home-page-logado/home-page-logado.html" id="logo">
+      <img src="/home-page/imagens/logo_biblioteca.png" alt="Logo da Biblioteca" />
+  </a>
+
+  <div class="container">
+      <h2>Tabela de Alunos</h2>
+
+      <form id="searchForm">
+          <input type="text" id="searchInput" placeholder="Pesquisar por nome..." />
+          <button type="submit">Pesquisar</button>
+          <button type="button" id="btnLimparBusca">Limpar</button>
+      </form>
+
+      <table id="alunosTable">
+          <thead>
+              <tr>
+                  <th>ID</th>
+                  <th>Nome</th>
+                  <th>Matrícula</th>
+                  <th>CPF</th>
+                  <th>Email</th>
+                  <th>Telefone</th>
+                  <th>Função</th>
+              </tr>
+          </thead>
+          <tbody></tbody>
+      </table>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+
+<script>
+  // Animação Three.js permanece igual
+  const canvas = document.getElementById('bg-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x000000, 0);
+
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 0, 30);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+  scene.add(ambientLight);
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(10, 10, 10);
+  scene.add(directionalLight);
+
+  const planetaGeometry = new THREE.SphereGeometry(5, 32, 32);
+  const planetaMaterial = new THREE.MeshPhongMaterial({ color: 0x1e90ff, shininess: 100, specular: 0x555555 });
+  const planeta = new THREE.Mesh(planetaGeometry, planetaMaterial);
+  scene.add(planeta);
+
+  const luaGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+  const luaMaterial = new THREE.MeshPhongMaterial({ color: 0xd3d3d3, shininess: 10 });
+  const lua = new THREE.Mesh(luaGeometry, luaMaterial);
+  scene.add(lua);
+
+  const orbitGroup = new THREE.Group();
+  orbitGroup.add(lua);
+  scene.add(orbitGroup);
+
+  lua.position.set(10, 0, 0);
+
+  function animate() {
+    requestAnimationFrame(animate);
+    planeta.rotation.y += 0.0015;
+    orbitGroup.rotation.y += 0.01;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    renderer.setSize(width, height);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+  });
+</script>
+
+<script>
+    const alunosTableBody = document.querySelector('#alunosTable tbody');
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const btnLimparBusca = document.getElementById('btnLimparBusca');
+
+    async function carregarAlunos(query = '') {
+        try {
+            const response = await fetch(`/pesquisar?q=${encodeURIComponent(query)}&category=aluno`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            montarTabelaAlunos(data.resultados || []);
+        } catch (error) {
+            console.error('Erro ao carregar alunos:', error);
+            alert('Erro ao carregar alunos. Veja o console para detalhes.');
+        }
+    }
+
+    function montarTabelaAlunos(alunos) {
+        alunosTableBody.innerHTML = '';
+
+        if (alunos.length === 0) {
+            alunosTableBody.innerHTML = '<tr><td colspan="7">Nenhum aluno encontrado.</td></tr>';
+            return;
+        }
+
+        alunos.forEach(aluno => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${aluno.id}</td>
+                <td>${aluno.nome}</td>
+                <td>${aluno.matricula}</td>
+                <td>${aluno.cpf}</td>
+                <td>${aluno.email}</td>
+                <td>${aluno.telefone}</td>
+                <td>${aluno.funcao}</td>
+            `;
+            alunosTableBody.appendChild(row);
+        });
+    }
+
+    searchForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const query = searchInput.value.trim();
+        carregarAlunos(query);
+    });
+
+    btnLimparBusca.addEventListener('click', () => {
+        searchInput.value = '';
+        carregarAlunos();
+    });
+
+    // Carrega todos os alunos ao abrir a página
+    carregarAlunos();
+</script>
+
+</body>
+</html>

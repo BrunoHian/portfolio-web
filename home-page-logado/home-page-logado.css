@@ -1,0 +1,60 @@
+input[type="search"], input[type="text"] {
+  background-color: #222;   /* cor do fundo */
+  color: white;             /* cor do texto */
+  border: 2px solid #ff9900; /* borda laranja */
+  border-radius: 5px;
+  padding: 6px 10px;
+}
+
+/* muda a cor do placeholder */
+input[type="search"]::placeholder, input[type="text"]::placeholder {
+  color: #ccc;
+}
+
+select {
+  background-color: #222;    /* cor do fundo */
+  color: white;              /* cor do texto */
+  border: 2px solid #ff9900; /* borda laranja */
+  border-radius: 5px;
+  padding: 6px 10px;
+}
+
+/* Se quiser mudar o estilo das opções (option), o suporte é limitado, mas dá para tentar: */
+option {
+  background-color: #333;
+  color: white;
+}
+
+footer ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+  margin: 0 0 20px 0;
+  overflow-x: auto;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#typewriter {
+  font-size: 2em;
+  color: white;
+  border-right: 2px solid white;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: blink 0.7s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { border-color: transparent; }
+  50% { border-color: white; }
+}
+
+#baki-animado {
+  width: 10px; /* ou 60px, o que preferir */
+  margin: 5px auto;
+  user-select: none;
+  display: none;
+  cursor: default;
+}

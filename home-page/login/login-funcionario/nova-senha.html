@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinir Senha</title>
+    <link rel="stylesheet" href="/home-page/login/login-funcionario/nova-senha.css">
+</head>
+<body>
+    <a href="/home-page/hmpg.html">
+        <img src="/home-page/imagens/logo_biblioteca.png" alt="Logo Biblioteca" id="logo">
+    </a>
+    <form id="formRedefinir">
+        <div class="titulo">
+            <h1>Redefinir Senha</h1>
+            <p>Digite seu e-mail para receber um link de redefinição</p>
+            <div class="barra-horizontal"></div>
+        </div>
+        <div>
+            <label for="email">E-mail:</label>
+            <input type="email" id="email" required>
+        </div>
+        <div>
+            <button type="submit" class="botao">Enviar</button>
+        </div>
+        <p>Lembrou a senha? <a href="/home-page/login/login.html">Fazer login</a></p>
+    </form>
+
+    <script>
+        document.getElementById('formRedefinir').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+
+            fetch('/api/redefinir-senha', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message))
+            .catch(error => console.error('Erro:', error));
+        });
+    </script>
+</body>
+</html>

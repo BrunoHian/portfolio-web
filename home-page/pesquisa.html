@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisar Aluno</title>
+</head>
+<body>
+    <h1>Pesquisar Aluno</h1>
+    <form id="searchForm" action="/resultados.html" method="get">
+        <label for="search">Pesquisar:</label>
+        <input type="text" id="search" name="query" placeholder="Digite o nome do aluno" required>
+        <input type="hidden" name="category" value="Aluno"> <!-- Categoria fixa como 'Aluno' -->
+        <button type="submit">Pesquisar</button>
+    </form>
+</body>
+</html>

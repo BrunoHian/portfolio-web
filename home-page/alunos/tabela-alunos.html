@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tabela de Alunos</title>
+    <link rel="stylesheet" href="/home-page/alunos/tab-alunos.css" />
+
+    <style>
+      /* Faz o canvas ocupar toda a tela atrás do conteúdo */
+      body, html {
+        margin: 0; 
+        padding: 0; 
+        height: 100%;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        background: black;
+      }
+
+      #bg-canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0; /* atrás */
+        display: block;
+      }
+
+      .container {
+        position: relative;
+        z-index: 10; /* na frente do canvas */
+        max-width: 1200px;
+        margin: 20px auto;
+        background-color: rgba(255, 255, 255, 0.15); /* transparente com leve branco */
+        backdrop-filter: blur(10px); /* vidro fosco */
+        border-radius: 10px;
+        padding: 20px;
+        color: white;
+      }
+
+      table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        background: transparent !important;
+        color: white;
+      }
+
+      th, td { 
+        border: 1px solid rgba(255,255,255,0.3); 
+        padding: 8px; 
+      }
+      th { 
+        background-color: rgba(255,255,255,0.2); 
+      }
+
+      button {
+        padding: 6px 12px;
+        margin: 2px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        color: white;
+      }
+      button.edit-btn { background-color: #4CAF50; }
+      button.edit-btn:hover { background-color: #45a049; }
+      button.remove-btn { background-color: #f44336; }
+      button.remove-btn:hover { background-color: #da190b; }
+      #btnAdicionar {
+        background-color: #2196F3;
+        margin-bottom: 15px;
+      }
+      #btnAdicionar:hover {
+        background-color: #0b7dda;
+      }
+
+      /* Esconde o fundo branco padrão dos inputs e torna texto branco */
+      input, button {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+      }
+      input::placeholder {
+        color: #ddd;
+      }
+
+      /* Container do formulário com transparência */
+      #formContainer {
+        background-color: rgba(255,255,255,0.15);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+      }
+
+      .hidden { display: none; }
+
+a#logo {
+    position: fixed;   
+    top: 10px;         
+    left: 10px;        
+    z-index: 1000;     
+    width: 150px;
+    margin: 0;         
+    display: block;
+}
+      a#logo img {
+        width: 100%;
+        height: auto;
+      }
+    </style>
+</head>
+<body>
+
+
+  <canvas id="bg-canvas"></canvas>
+
+  <a href="/home-page-logado/home-page-logado.html" id="logo">
+      <img src="/home-page/imagens/logo_biblioteca.png" alt="Logo da Biblioteca" />
+  </a>
+
+  <div class="container">
+      <h2>Tabela de Alunos</h2>
+
+      <form id="searchForm">
+          <input type="text" id="searchInput" placeholder="Pesquisar por nome..." />
+          <button type="submit">Pesquisar</button>
+          <button type="button" id="btnLimparBusca">Limpar</button>
+      </form>
+
+      <button id="btnAdicionar">Adicionar Aluno</button>
+
+      <div id="formContainer" class="hidden">
+          <h3>Adicionar/Editar Aluno</h3>
+          <form id="addForm">
+              <input type="hidden" id="alunoId" />
+              <input type="text" id="nome" placeholder="Nome" required />
+              <input type="text" id="matricula" placeholder="Matrícula" required />
+              <input type="text" id="cpf" placeholder="CPF" required />
+              <input type="email" id="email" placeholder="Email" required />
+              <input type="text" id="telefone" placeholder="Telefone" required />
+              <input type="text" id="funcao" value="Aluno" readonly />
+              <button type="submit">Salvar</button>
+              <button type="button" id="btnCancelarFormulario">Cancelar</button>
+          </form>
+      </div>
+
+      <table id="alunosTable">
+          <thead>
+              <tr>
+                  <th>ID</th>
+                  <th>Nome</th>
+                  <th>Matrícula</th>
+                  <th>CPF</th>
+                  <th>Email</th>
+                  <th>Telefone</th>
+                  <th>Função</th>
+                  <th>Ações</th>
+              </tr>
+          </thead>
+          <tbody></tbody>
+      </table>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+
+<script>
+  // SETUP Three.js animation do planeta com lua orbitando
+  const canvas = document.getElementById('bg-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x000000, 0); // transparente
+
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 0, 30);
+
+  // Luz suave
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+  scene.add(ambientLight);
+
+  // Luz direcional para simular sol
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(10, 10, 10);
+  scene.add(directionalLight);
+
+  // Planeta (esfera azul)
+  const planetaGeometry = new THREE.SphereGeometry(5, 32, 32);
+  const planetaMaterial = new THREE.MeshPhongMaterial({ color: 0x1e90ff, shininess: 100, specular: 0x555555 });
+  const planeta = new THREE.Mesh(planetaGeometry, planetaMaterial);
+  scene.add(planeta);
+
+  // Lua (esfera menor, cinza claro)
+  const luaGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+  const luaMaterial = new THREE.MeshPhongMaterial({ color: 0xd3d3d3, shininess: 10 });
+  const lua = new THREE.Mesh(luaGeometry, luaMaterial);
+  scene.add(lua);
+
+  // Grupo para orbitar a lua ao redor do planeta
+  const orbitGroup = new THREE.Group();
+  orbitGroup.add(lua);
+  scene.add(orbitGroup);
+
+  lua.position.set(10, 0, 0); // distância inicial da lua do planeta
+
+  // Função de animação
+  function animate() {
+    requestAnimationFrame(animate);
+
+    planeta.rotation.y += 0.0015;  // Planeta girando lento
+    orbitGroup.rotation.y += 0.01; // Lua orbitando o planeta
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // Ajustar ao redimensionar janela
+  window.addEventListener('resize', () => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    renderer.setSize(width, height);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+  });
+
+</script>
+
+<script>
+    // Seu JS original para gerenciar a tabela e formulário aqui (sem alteração)
+    const formContainer = document.getElementById('formContainer');
+    const addForm = document.getElementById('addForm');
+    const alunosTableBody = document.querySelector('#alunosTable tbody');
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const btnLimparBusca = document.getElementById('btnLimparBusca');
+    const btnAdicionar = document.getElementById('btnAdicionar');
+    const btnCancelarFormulario = document.getElementById('btnCancelarFormulario');
+
+    function mostrarFormularioAdicionar(aluno = null) {
+        formContainer.classList.remove('hidden');
+        if (aluno) {
+            document.getElementById('alunoId').value = aluno.id || '';
+            document.getElementById('nome').value = aluno.nome || '';
+            document.getElementById('matricula').value = aluno.matricula || '';
+            document.getElementById('cpf').value = aluno.cpf || '';
+            document.getElementById('email').value = aluno.email || '';
+            document.getElementById('telefone').value = aluno.telefone || '';
+            document.getElementById('funcao').value = aluno.funcao || 'Aluno';
+        } else {
+            addForm.reset();
+            document.getElementById('alunoId').value = '';
+            document.getElementById('funcao').value = 'Aluno';
+        }
+    }
+
+    function cancelarFormulario() {
+        formContainer.classList.add('hidden');
+        addForm.reset();
+    }
+
+    async function carregarAlunos(query = '') {
+        try {
+            const response = await fetch(`/pesquisar?q=${encodeURIComponent(query)}&category=aluno`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            montarTabelaAlunos(data.resultados || []);
+        } catch (error) {
+            console.error('Erro ao carregar alunos:', error);
+            alert('Erro ao carregar alunos. Veja o console para detalhes.');
+        }
+    }
+
+    function montarTabelaAlunos(alunos) {
+        alunosTableBody.innerHTML = '';
+
+        if (alunos.length === 0) {
+            alunosTableBody.innerHTML = '<tr><td colspan="8">Nenhum aluno encontrado.</td></tr>';
+            return;
+        }
+
+        alunos.forEach(aluno => {
+            const row = document.createElement('tr');
+
+            // Criar os botões dinamicamente, evitando inline JS
+            const btnEditar = document.createElement('button');
+            btnEditar.textContent = 'Editar';
+            btnEditar.className = 'edit-btn';
+            btnEditar.addEventListener('click', () => editarAluno(aluno));
+
+            const btnRemover = document.createElement('button');
+            btnRemover.textContent = 'Remover';
+            btnRemover.className = 'remove-btn';
+            btnRemover.addEventListener('click', () => removerAluno(aluno.id));
+
+            row.innerHTML = `
+                <td>${aluno.id}</td>
+                <td>${aluno.nome}</td>
+                <td>${aluno.matricula}</td>
+                <td>${aluno.cpf}</td>
+                <td>${aluno.email}</td>
+                <td>${aluno.telefone}</td>
+                <td>${aluno.funcao}</td>
+                <td></td>
+            `;
+
+            row.querySelector('td:last-child').appendChild(btnEditar);
+            row.querySelector('td:last-child').appendChild(btnRemover);
+
+            alunosTableBody.appendChild(row);
+        });
+    }
+
+    function editarAluno(aluno) {
+        mostrarFormularioAdicionar(aluno);
+    }
+
+    async function removerAluno(id) {
+      if (!confirm('Tem certeza que deseja remover este aluno?')) return;
+
+      try {
+        const response = await fetch(`/excluir-aluno/${id}`, { method: 'DELETE' });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert(`Erro ao remover aluno: ${data.message || response.statusText}`);
+          return;
+        }
+
+        if (data.success) {
+          alert('Aluno removido com sucesso!');
+          carregarAlunos();
+        } else {
+          alert(`Erro ao remover aluno: ${data.message || 'Operação não foi concluída'}`);
+        }
+      } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao remover aluno. Veja o console para detalhes.');
+      }
+    }
+
+    addForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const aluno = {
+            id: document.getElementById('alunoId').value,
+            nome: document.getElementById('nome').value,
+            matricula: document.getElementById('matricula').value,
+            cpf: document.getElementById('cpf').value,
+            email: document.getElementById('email').value,
+            telefone: document.getElementById('telefone').value,
+            funcao: document.getElementById('funcao').value,
+        };
+
+        const method = aluno.id ? 'PUT' : 'POST';
+        const url = aluno.id ? '/editar-aluno' : '/adicionar-aluno';
+
+        try {
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(aluno)
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Aluno salvo com sucesso!');
+                carregarAlunos();
+                cancelarFormulario();
+            } else {
+                alert('Erro ao salvar aluno');
+            }
+        } catch (error) {
+            console.error('Erro ao salvar aluno:', error);
+            alert('Erro ao salvar aluno. Veja o console para detalhes.');
+        }
+    });
+
+    searchForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const query = searchInput.value.trim();
+        carregarAlunos(query);
+    });
+
+    btnLimparBusca.addEventListener('click', () => {
+        searchInput.value = '';
+        carregarAlunos();
+    });
+
+    btnAdicionar.addEventListener('click', () => mostrarFormularioAdicionar());
+    btnCancelarFormulario.addEventListener('click', cancelarFormulario);
+
+    // Carrega todos os alunos ao abrir a página
+    carregarAlunos();
+</script>
+
+</body>
+</html>
